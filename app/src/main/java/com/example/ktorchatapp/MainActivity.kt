@@ -11,6 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.ktorchatapp.presentation.chat.ChatScreen
+import com.example.ktorchatapp.presentation.username.UserNameScreen
 import com.example.ktorchatapp.ui.theme.KtorChatAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -18,32 +25,30 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            KtorChatAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+            val navController = rememberNavController()
+            NavHost(
+                navController = navController,
+                startDestination = "username_screen"
+            ) {
+                composable("username_screen"){
+                    UserNameScreen(onNavigate = navController::navigate)
                 }
+                composable(
+                    route = "chat_screen/{username}",
+                    arguments = listOf(
+                        navArgument(name = "username"){
+                            type = NavType.StringType
+                            nullable = true
+                        }
+                    ),
+                    emptyList(),
+                    {
+                        val username = it.arguments?.getString("username")
+                        ChatScreen(username = username)
+                    }
+                )
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    KtorChatAppTheme {
-        Greeting("Android")
     }
 }
